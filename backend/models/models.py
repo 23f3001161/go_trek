@@ -14,8 +14,8 @@ def create_db(app : Flask, userdatastore:SQLAlchemyUserDatastore):
     with app.app_context():
         db.create_all()
         admin_role = userdatastore.find_or_create_role(name='admin', description='Admin Role')
-        user_role = userdatastore.find_or_create_role(name='user', description='Guest Role')
         staff_role = userdatastore.find_or_create_role(name='staff', description='Staff Role')
+        staff_role = userdatastore.find_or_create_role(name='user', description='User Role')
 
         if not userdatastore.find_user(email="admin@gmail.com"): 
             userdatastore.create_user(
@@ -26,18 +26,6 @@ def create_db(app : Flask, userdatastore:SQLAlchemyUserDatastore):
             
         )
             
-
-            # Test Instances creation
-        if not userdatastore.find_user(email="aman@gmail.com"):
-                userdatastore.create_user(
-                    full_name="Aman Obaid",
-                    email="aman@gmail.com",
-                    password="112233",
-                    roles = [user_role],
-                    phone= "9559437869",
-                    
-                )
-
         db.session.commit()
 
 class Users(db.Model, UserMixin):
@@ -94,13 +82,17 @@ class TrekModel(db.Model):
     duration_days= db.Column(db.Integer, nullable=False)
     total_slots  = db.Column(db.Integer, nullable=False)  
     available_slots  = db.Column(db.Integer, nullable=False)   
-    status = db.Column(db.Enum('pending', 'approved', 'open', 'closed', 'completed'),
+    status = db.Column(db.Enum('pending', 'approved', 'open', 'closed', 'started', 'completed'),
                                  nullable=False, default='pending')
     start_date = db.Column(db.Date, nullable=False)
     end_date = db.Column(db.Date, nullable=False)
     assigned_staff_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda:datetime.now(timezone.utc))
-    assigned_staff = db.relationship('Users', backref='assigned_treks')
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable = False)
+    assigned_staff = db.relationship('Users', foreign_keys=[assigned_staff_id], backref='assigned_treks')
+    creator = db.relationship('Users', foreign_keys=[created_by], backref='created_treks')
+    
+
     
 
 class BookingModel(db.Model):
@@ -116,8 +108,8 @@ class BookingModel(db.Model):
     id= db.Column(db.Integer, primary_key=True)
     user_id= db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     trek_id  = db.Column(db.Integer, db.ForeignKey('treks.id'), nullable=False)
-    booking_date = db.Column(db.DateTime, default=datetime.now(timezone.utc))
-    status = db.Column(db.Enum('booked', 'cancelled', 'completed'),
+    booking_date = db.Column(db.DateTime, default=lambda:datetime.now(timezone.utc))
+    status = db.Column(db.Enum('booked', 'cancelled', 'completed', 'waitlist'),
                                 nullable=False, default='booked')
     payment_status = db.Column(db.Enum('pending', 'paid', 'refunded'),
                                 nullable=False, default='pending')
