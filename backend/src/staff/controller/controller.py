@@ -7,10 +7,19 @@ from models.models import TrekModel,BookingModel
 
 def get_single_trek_controller(trek_id):
     try:
-        if trek_id:
-            trek = TrekModel.query.get(trek)
-            if trek:
-                return jsonify({
+        if not trek_id:
+            return jsonify({
+            "error" : "Trek ID is requirerd"
+            }), 400
+        
+        trek = TrekModel.query.get(trek_id)
+        if not trek:
+            return jsonify({
+                "error" : "Trek not founds"
+            })
+            
+            
+        return jsonify({
                     "data": {
                     "id": trek.id,
                     "name": trek.name,
@@ -22,13 +31,15 @@ def get_single_trek_controller(trek_id):
                     "start_date": trek.start_date,
                     "end_date": trek.end_date
                     }
-                })
+                }), 200
+           
+        
 
     except Exception as e:
         return jsonify({
             "error" : "Something Went Wrong",
             "actual_error" : str(e)
-        })
+        }), 500
 
 def get_participants_controller(trek_id, current_user):
 

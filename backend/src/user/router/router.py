@@ -1,9 +1,8 @@
-from flask import Blueprint, jsonify
-from flask_security import auth_token_required, utils, roles_accepted, current_user
+from flask import Blueprint
+from flask_security import auth_token_required, roles_accepted, current_user
 from flask import request
-from flask_security.utils import verify_password, hash_password
-from extensions.extensions import userdatastore, db
 from src.user.controller import controller
+
 
 user = Blueprint("user", __name__)
 
@@ -43,7 +42,32 @@ def get_booking_history():
 
 
 @user.route("/api/users/profile", methods = ['PUT'])
+@auth_token_required
+@roles_accepted("user")
 def update_profile():
     data = request.get_json()
     return controller.update_user_controller(data,current_user.id)
 
+
+
+@user.route("/api/csv", methods =['GET'])
+@auth_token_required
+@roles_accepted("user")
+def generate_csv():
+    return controller.generate_csv_controller(current_user.id)
+
+
+@user.route("/api/users/status/<task_id>", methods =['GET'])
+@auth_token_required
+@roles_accepted("user")
+def get_csv_status(task_id):
+    return controller.get_task_status(task_id)
+
+
+
+@user.route("/api/users/bookings", methods =['DELETE'])
+@auth_token_required
+@roles_accepted("user")
+def cancel_trek():
+    data = request.get_json()
+    return controller.cancel_booking(data,current_user.id)

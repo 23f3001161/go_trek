@@ -1,8 +1,11 @@
 from flask import jsonify
 from flask_security.utils import hash_password,verify_password
 from extensions.extensions import userdatastore, db
+from extensions.extensions import redis_client
 from models.models import TrekModel, Users, BookingModel
 from datetime import datetime
+import json
+
 
 
 def create_staff_controller(data):
@@ -184,11 +187,12 @@ def create_trek(data):
             status="pending",
             start_date=start_date,
             end_date=end_date,
-            assigned_staff_id=data.get('assigned_staff_id'), 
             created_by = data.get("created_by")
         )
         db.session.add(new_trek)
         db.session.commit()
+        for key in redis_client.scan_iter("treks:*"):
+            redis_client.delete(key)
         return jsonify({
             "message": "Trek created successfully",
             "data": {
@@ -212,6 +216,11 @@ def create_trek(data):
 def get_trek(search_query,status):
 
     try:
+        cache_key = f"treks:{search_query}:{status}"
+        cached = redis_client.get(cache_key)
+
+        if cached:
+            return jsonify(json.loads(cached)), 200
         query = TrekModel.query
 
         if search_query:
@@ -230,9 +239,7 @@ def get_trek(search_query,status):
                 "message" : "Enter status on specified values"
             }),404
         treks = query.all()
-
-
-        return jsonify({
+        response = {
             "message" : "Treks retrieved successfully",
             "total_treks" : len(treks),
             "data" : [{
@@ -246,7 +253,15 @@ def get_trek(search_query,status):
                 "available_slots": trek.available_slots,
                 "staff_assigned": trek.assigned_staff.full_name if trek.assigned_staff else None
             } for trek in treks]
-        })
+        }
+
+        redis_client.setex(
+        cache_key,
+        300,
+        json.dumps(response)
+)
+
+        return jsonify(response)
     except Exception as e:
         return jsonify({
             "error" : "Internal Server Error",
@@ -432,7 +447,7 @@ def get_bookings(search_query, status):
 
         if search_query:
             search_term = f"%{search_query}%"
-            query = query.join(Users).join(TrekModel).filter(
+            query = query.join(BookingModel.user).join(BookingModel.trek).filter(
                 (
                 (Users.full_name.ilike(search_term)) |
                 (Users.email.ilike(search_term)) |

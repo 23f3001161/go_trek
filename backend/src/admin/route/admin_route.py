@@ -10,7 +10,7 @@ admin = Blueprint("admin",__name__)
 
 
 
-@admin.route("/api/staffs/create", methods =['POST'])
+@admin.route("/api/staffs", methods =['POST'])
 @auth_token_required
 @roles_accepted('admin')
 def create_staff():
@@ -61,7 +61,7 @@ def get_treks():
 
 @admin.route("/api/treks/<int:trek_id>", methods = ['PUT'])
 @auth_token_required
-@roles_accepted('admin','user')
+@roles_accepted('admin')
 def update_treks(trek_id):
     data = request.get_json()
     

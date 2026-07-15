@@ -1,5 +1,11 @@
 flask
 flask_sqlalchemy
 flask_security_too
+flask_security
 python-dotenv
 argon2_cffi
+celery
+celery[redis]
+redis
+flask_mail
+flask-cors

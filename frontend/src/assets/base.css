@@ -1,0 +1,12 @@
+/* Bootstrap handles color, spacing, and component styling app-wide.
+   This file is just the page font + a couple of resets. */
+body {
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    Arial,
+    sans-serif;
+}

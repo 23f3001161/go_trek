@@ -15,17 +15,9 @@ def login():
     return auth_controller.login_controller(data)
 
    
-@auth.route("/api/check", methods = ['GET'])
-@login_required
-def check_auth():
-    return {
-        "status" : "User is authenticated",
-        "email" : current_user.email
-    }, 200
 
 
 @auth.route("/api/logout", methods = ['POST'])
-@login_required
 @auth_token_required
 def logout():
     current_user.fs_uniquifier = uuid.uuid4().hex

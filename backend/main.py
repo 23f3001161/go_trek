@@ -1,4 +1,5 @@
 from flask import Flask
+from flask_cors import CORS
 from flask_security import SQLAlchemyUserDatastore, Security
 from src.admin.route.admin_route import admin
 from src.staff.router.router import staff
@@ -7,11 +8,12 @@ from models.models import db, create_db
 from src.auth.route.auth_routes import auth
 from extensions.extensions import userdatastore
 from dotenv import load_dotenv
+from flask import send_from_directory
 
 import os
 load_dotenv()
 app = Flask(__name__)
-
+CORS(app, origins=["http://localhost:5173"])
 app.register_blueprint(admin)
 app.register_blueprint(auth)
 app.register_blueprint(staff)
@@ -29,6 +31,11 @@ db.init_app(app)
 security = Security(app, userdatastore)
 
 
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve_frontend(path):
+    return send_from_directory('frontend', 'index.html')
 if __name__ == "__main__":
     create_db(app,userdatastore)
     app.run(debug=True)

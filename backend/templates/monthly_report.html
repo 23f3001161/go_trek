@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Monthly Trek Report</title>
+</head>
+<body style="font-family: Arial, sans-serif; line-height: 1.6;">
+
+```
+<h1>Monthly Trek Report - {{ month_year }}</h1>
+
+<hr>
+
+<h2>Summary</h2>
+
+<table border="1" cellpadding="8" cellspacing="0">
+    <tr>
+        <th align="left">Metric</th>
+        <th align="left">Value</th>
+    </tr>
+    <tr>
+        <td>Treks Conducted</td>
+        <td>{{ treks_conducted }}</td>
+    </tr>
+    <tr>
+        <td>Unique Participants</td>
+        <td>{{ unique_participants }}</td>
+    </tr>
+    <tr>
+        <td>Total Participations</td>
+        <td>{{ total_participations }}</td>
+    </tr>
+</table>
+
+<br>
+
+<h2>Most Popular Treks</h2>
+
+<ol>
+    {% for trek_name, participants in popular_treks %}
+    <li>
+        <strong>{{ trek_name }}</strong>
+        ({{ participants }} participants)
+    </li>
+    {% endfor %}
+</ol>
+
+<br>
+
+<p>
+    Generated automatically on {{ generated_at }}.
+</p>
+```
+
+</body>
+</html>

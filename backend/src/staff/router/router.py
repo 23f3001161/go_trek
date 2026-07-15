@@ -41,14 +41,14 @@ def update_booking_status(booking_id):
         data
     )
 @staff.route("/api/staff/trek/<int:trek_id>")
-@roles_accepted("staff", "admin")
 @auth_token_required
+@roles_accepted("staff", "admin")
 def get_single_trek(trek_id):
     return controller.get_single_trek_controller(trek_id)
 
-@staff.route("/api/treks/<int:trek_id>", methods = ['PUT'])
+@staff.route("/api/treks/<int:trek_id>/status", methods = ['PUT'])
 @auth_token_required
 @roles_accepted("staff")
-def update_trek_status(trek_id, data):
+def update_trek_status(trek_id):
     data = request.get_json()
     return controller.update_trek_status(data,trek_id)

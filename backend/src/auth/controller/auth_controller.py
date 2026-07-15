@@ -4,10 +4,11 @@ from flask import request
 from flask_security.utils import hash_password, verify_password
 from models.models import db
 from extensions.extensions import userdatastore
-
+import traceback
 
 
 def login_controller(data):
+    
 
     try:
         if not data:
@@ -16,6 +17,7 @@ def login_controller(data):
     }), 400
 
         email = data['email']
+        print(email)
         password = data['password']
         
         user = userdatastore.find_user(email=email)
@@ -34,12 +36,14 @@ def login_controller(data):
         return jsonify({
             "message" : "Logged In Successfully",
                 "data": {
+                    "id" : user.id,
                     "name" : user.full_name,
                     "role" : [ role.name for role in user.roles]
                 },
                 "auth_token" : auth_token
             }), 200
     except Exception as e:
+        traceback.print_exc()
         return jsonify({
         "error": "Internal Server Error",
         "error message": f"{str(e)}"
